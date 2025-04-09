@@ -3,7 +3,7 @@
 # ========================================
 # 全局配置
 # ========================================
-CURRENT_VERSION="1.2.1"
+CURRENT_VERSION="1.2.0"
 UPDATE_URL="https://raw.githubusercontent.com/qq1055506789/realm/main/realm.sh"
 VERSION_CHECK_URL="https://raw.githubusercontent.com/qq1055506789/realm/main/version.txt"
 REALM_DIR="/root/realm"
