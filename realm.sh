@@ -333,20 +333,21 @@ show_rules() {
     
     if [ ${#lines[@]} -eq 0 ]; then
         echo -e "没有发现任何转发规则。"
-        return
+    else
+        local index=1
+        for line in "${lines[@]}"; do
+            local line_number=$(echo "$line" | cut -d ':' -f 1)
+            local remark=$(sed -n "$((line_number + 1))p" "$CONFIG_FILE" | grep "^# 备注:" | cut -d ':' -f 2 | sed 's/^[[:space:]]*//')
+            local listen_info=$(sed -n "$((line_number + 2))p" "$CONFIG_FILE" | cut -d '"' -f 2)
+            local remote_info=$(sed -n "$((line_number + 3))p" "$CONFIG_FILE" | cut -d '"' -f 2)
+
+            printf "%-4s| %-24s| %-34s| %-20s\n" " $index" "$listen_info" "$remote_info" "$remark"
+            echo -e "${BLUE}---------------------------------------------------------------------------------------------------------${NC}"
+            ((index++))
+        done
     fi
 
-    local index=1
-    for line in "${lines[@]}"; do
-        local line_number=$(echo "$line" | cut -d ':' -f 1)
-        local remark=$(sed -n "$((line_number + 1))p" "$CONFIG_FILE" | grep "^# 备注:" | cut -d ':' -f 2 | sed 's/^[[:space:]]*//')
-        local listen_info=$(sed -n "$((line_number + 2))p" "$CONFIG_FILE" | cut -d '"' -f 2)
-        local remote_info=$(sed -n "$((line_number + 3))p" "$CONFIG_FILE" | cut -d '"' -f 2)
-
-        printf "%-4s| %-24s| %-34s| %-20s\n" " $index" "$listen_info" "$remote_info" "$remark"
-        echo -e "${BLUE}---------------------------------------------------------------------------------------------------------${NC}"
-        ((index++))
-    done
+    read -rp "按回车键返回主菜单..." dummy
 }
 
 # 添加转发规则
