@@ -679,10 +679,8 @@ validate_ip_or_domain() {
         done
         return 0
     fi
-    # 允许域名（严格校验）
-    if [[ "$input" =~ ^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$ ]]; then
-        return 0
-    fi
+    # 允许域名（简单校验）
+    [[ "$input" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] && return 0
     return 1
 }
 
@@ -724,9 +722,9 @@ main_menu() {
     while true; do
         echo -e "${YELLOW}▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂${NC}"
         echo -e "  "
-        echo -e "                ${BLUE}LeeRealm 高级管理脚本 v$CURRENT_VERSION${NC}"
-        echo -e "        by：Lee    修改日期：2025/4/1"
-        echo -e "        更新内容: 1.基本重做了脚本"
+        echo -e "                ${BLUE}Realm 高级管理脚本 v$CURRENT_VERSION${NC}"
+        echo -e "        修改by：Ami    修改日期：2025/4/1"
+        echo -e "        修改内容:1.基本重做了脚本"
         echo -e "                 2.新增了自动更新脚本"
         echo -e "                 3.realm支持检测最新版本"
         echo -e "    (1)安装前请先更新系统软件包，缺少命令可能无法安装"
@@ -735,7 +733,8 @@ main_menu() {
         echo -e "    仓库：https://github.com/qq1055506789/realm"
         echo -e "    2025/4/1 更新：有人反馈该新版本添加规则过多后无法启动，如果遇到问题，可以尝试回退老版本（大概率是备注问题）"
         echo -e "        删除该脚本 rm realm.sh"
-        echo -e "        运行 wget -N https://raw.githubusercontent.com/qq1055506789/realm/refs/heads/main/realm.sh && chmod +x realm.sh && ./realm.sh
+        echo -e "        运行 wget -N https://raw.githubusercontent.com/qq1055506789/realm/main/realm-2024.sh && chmod +x realm.sh && ./realm.sh"
+        echo -e "        或者 wget -N https://raw.githubusercontent.com/qq1055506789/realm/main/realm-2025.sh && chmod +x realm.sh && ./realm.sh${NC}"
         echo -e "${YELLOW}▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂${NC}"
         echo -e "  "
         echo -e "${YELLOW}服务状态：$(service_control status)${NC}"
