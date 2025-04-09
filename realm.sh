@@ -679,8 +679,10 @@ validate_ip_or_domain() {
         done
         return 0
     fi
-    # 允许域名（简单校验）
-    [[ "$input" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] && return 0
+    # 允许域名（严格校验）
+    if [[ "$input" =~ ^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$ ]]; then
+        return 0
+    fi
     return 1
 }
 
