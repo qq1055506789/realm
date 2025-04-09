@@ -656,11 +656,16 @@ validate_port() {
 
 validate_ip() {
     local ip=$1
+    # 允许标准 IPv4
     if [[ "$ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         IFS='.' read -ra ip_parts <<< "$ip"
         for part in "${ip_parts[@]}"; do
             (( part >= 0 && part <= 255 )) || return 1
         done
+        return 0
+    fi
+    # 允许域名（简单校验，不含完整 DNS 解析）
+    if [[ "$ip" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
         return 0
     fi
     return 1
