@@ -3,7 +3,7 @@
 # ========================================
 # 全局配置
 # ========================================
-CURRENT_VERSION="1.2.1"
+CURRENT_VERSION="1.2.0"
 UPDATE_URL="https://raw.githubusercontent.com/qq1055506789/realm/main/realm.sh"
 VERSION_CHECK_URL="https://raw.githubusercontent.com/qq1055506789/realm/main/version.txt"
 REALM_DIR="/root/realm"
@@ -723,8 +723,8 @@ main_menu() {
         echo -e "${YELLOW}▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂${NC}"
         echo -e "  "
         echo -e "                ${BLUE}Realm 高级管理脚本 v$CURRENT_VERSION${NC}"
-        echo -e "        修改by：Ami    修改日期：2025/4/1"
-        echo -e "        修改内容:1.基本重做了脚本"
+        echo -e "        by：Lee    修改日期：2025/4/1"
+        echo -e "        更新内容:1.基本重做了脚本"
         echo -e "                 2.新增了自动更新脚本"
         echo -e "                 3.realm支持检测最新版本"
         echo -e "    (1)安装前请先更新系统软件包，缺少命令可能无法安装"
