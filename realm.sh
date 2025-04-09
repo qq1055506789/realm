@@ -4,8 +4,8 @@
 # 全局配置
 # ========================================
 CURRENT_VERSION="1.2.0"
-UPDATE_URL="https://raw.githubusercontent.com/qq1055506789/realm/refs/heads/main/realm.sh"
-VERSION_CHECK_URL="https://raw.githubusercontent.com/qq1055506789/realm/refs/heads/main/version.txt"
+UPDATE_URL="https://raw.githubusercontent.com/qq1055506789/realm/main/realm.sh"
+VERSION_CHECK_URL="https://raw.githubusercontent.com/qq1055506789/realm/main/version.txt"
 REALM_DIR="/root/realm"
 CONFIG_FILE="$REALM_DIR/config.toml"
 SERVICE_FILE="/etc/systemd/system/realm.service"
@@ -259,6 +259,7 @@ deploy_realm() {
         *) 
             echo -e "${RED}✖ 不支持的架构: $(uname -m)${NC}"
             log "ERROR" "不支持的架构: $(uname -m)"
+            read -rp "按回车键继续..." dummy
             return 1
             ;;
     esac
@@ -288,6 +289,7 @@ deploy_realm() {
         echo -e "1. 网络连接状态"
         echo -e "2. GitHub访问权限"
         echo -e "3. 手动验证下载地址: $DOWNLOAD_URL"
+        read -rp "按回车键继续..." dummy
         return 1
     fi
 
@@ -319,6 +321,7 @@ EOF
     systemctl daemon-reload
     log "INFO" "安装成功"
     echo -e "${GREEN}✔ 安装完成！${NC}"
+    read -rp "按回车键返回主菜单..." dummy
 }
 
 # 查看转发规则
@@ -365,9 +368,9 @@ add_rule() {
             continue
         fi
         
-        read -rp "目标服务器IP: " remote_ip
-        if ! validate_ip "$remote_ip"; then
-            echo -e "${RED}✖ 无效的IP地址！${NC}"
+        read -rp "目标服务器IP或域名: " remote_ip
+        if ! validate_ip_or_domain "$remote_ip"; then
+            echo -e "${RED}✖ 无效的IP地址或域名！${NC}"
             continue
         fi
         
@@ -445,6 +448,7 @@ EOF
         if ! service_control restart; then
             echo -e "${RED}✖ 服务重启失败，请检查配置${NC}"
             log "ERROR" "服务重启失败"
+            read -rp "按回车键继续..." dummy
             return 1
         fi
 
@@ -466,6 +470,7 @@ delete_rule() {
     
     if [ ${#rules[@]} -eq 0 ]; then
         echo "没有发现任何转发规则。"
+        read -rp "按回车键继续..." dummy
         return
     fi
 
@@ -479,6 +484,7 @@ delete_rule() {
 
     if ! [[ $choice =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#rules[@]} )); then
         echo -e "${RED}无效选择，请输入有效序号${NC}"
+        read -rp "按回车键继续..." dummy
         return
     fi
 
@@ -511,11 +517,13 @@ delete_rule() {
     if ! service_control restart; then
         echo -e "${RED}✖ 服务重启失败，请检查配置${NC}"
         log "ERROR" "服务重启失败"
+        read -rp "按回车键继续..." dummy
         return 1
     fi
 
     log "INFO" "已删除规则: $listen_info → $remote_info"
     echo -e "${GREEN}✔ 规则删除成功${NC}"
+    read -rp "按回车键继续..." dummy
 }
 
 # 服务控制
@@ -601,18 +609,22 @@ manage_cron() {
             else
                 echo -e "${RED}✖ 无效时间！${NC}"
             fi
+            read -rp "按回车键继续..." dummy
             ;;
         2)
             crontab -l | grep -v "realm" | crontab -
             log "INFO" "清除定时任务"
             echo -e "${YELLOW}✔ 定时任务已清除！${NC}"
+            read -rp "按回车键继续..." dummy
             ;;
         3)
             echo -e "\n${BLUE}当前定时任务：${NC}"
             crontab -l | grep --color=auto "realm"
+            read -rp "按回车键继续..." dummy
             ;;
         *)
             echo -e "${RED}✖ 无效选择！${NC}"
+            read -rp "按回车键继续..." dummy
             ;;
     esac
 }
@@ -645,6 +657,8 @@ uninstall() {
     
     log "INFO" "卸载完成"
     echo -e "${GREEN}✔ 已完全卸载！${NC}"
+    read -rp "按回车键退出..." dummy
+    exit 0
 }
 
 # ========================================
@@ -655,20 +669,18 @@ validate_port() {
     [[ "$port" =~ ^[0-9]+$ ]] && (( port >= 1 && port <= 65535 ))
 }
 
-validate_ip() {
-    local ip=$1
-    # 允许标准 IPv4
-    if [[ "$ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        IFS='.' read -ra ip_parts <<< "$ip"
+validate_ip_or_domain() {
+    local input=$1
+    # 允许IPv4
+    if [[ "$input" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        IFS='.' read -ra ip_parts <<< "$input"
         for part in "${ip_parts[@]}"; do
             (( part >= 0 && part <= 255 )) || return 1
         done
         return 0
     fi
-    # 允许域名（简单校验，不含完整 DNS 解析）
-    if [[ "$ip" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-        return 0
-    fi
+    # 允许域名（简单校验）
+    [[ "$input" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] && return 0
     return 1
 }
 
@@ -710,18 +722,18 @@ main_menu() {
     while true; do
         echo -e "${YELLOW}▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂${NC}"
         echo -e "  "
-        echo -e "                ${BLUE}Realm 高级管理脚本 v$CURRENT_VERSION"
+        echo -e "                ${BLUE}LeeRealm 高级管理脚本 v$CURRENT_VERSION${NC}"
         echo -e "        by：Lee    修改日期：2025/4/1"
-        echo -e "        修改内容: 1.基本重做了脚本"
+        echo -e "        更新内容: 1.基本重做了脚本"
         echo -e "                 2.新增了自动更新脚本"
         echo -e "                 3.realm支持检测最新版本"
         echo -e "    (1)安装前请先更新系统软件包，缺少命令可能无法安装"
         echo -e "    (2)如果启动失败请检查 /root/realm/config.toml下有无多余配置或者卸载后重新配置"
         echo -e "    (3)该脚本只在debian系统下测试，未做其他系统适配，安装命令有别，可能无法启动。如若遇到问题，请自行解决"
-        echo -e "    仓库：https://github.com/qq1055506789/realm/"
+        echo -e "    仓库：https://github.com/qq1055506789/realm"
         echo -e "    2025/4/1 更新：有人反馈该新版本添加规则过多后无法启动，如果遇到问题，可以尝试回退老版本（大概率是备注问题）"
         echo -e "        删除该脚本 rm realm.sh"
-        echo -e "        运行 wget -N https://raw.githubusercontent.com/qq1055506789/realm/refs/heads/main/realm.sh && chmod +x realm.sh && ./realm.sh"
+        echo -e "        运行 wget -N https://raw.githubusercontent.com/qq1055506789/realm/refs/heads/main/realm.sh && chmod +x realm.sh && ./realm.sh
         echo -e "${YELLOW}▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂﹍▂${NC}"
         echo -e "  "
         echo -e "${YELLOW}服务状态：$(service_control status)${NC}"
@@ -759,21 +771,16 @@ main_menu() {
             9) 
                 echo -e "\n${BLUE}最近日志：${NC}"
                 tail -n 10 "$LOG_FILE" 
-                read -rp "按回车键继续..."
+                read -rp "按回车键继续..." dummy
                 ;;
-            10) 
-                uninstall
-                read -rp "按回车键继续..."
-                clear
-                exit 0
-                ;;
+            10) uninstall ;;
             0) 
                 echo -e "${GREEN}再见！${NC}"
                 exit 0 
                 ;;
             *) 
                 echo -e "${RED}无效选项！${NC}"
-                read -rp "按回车键继续..."
+                read -rp "按回车键继续..." dummy
                 ;;
         esac
         clear
